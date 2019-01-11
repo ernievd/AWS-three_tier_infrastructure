@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'A CloudFormation template to form a VPC for our tutorial'
+#Parameters:
+#  OwnerName:
+#    Description: 'The name of the owning engineer for the item'
+#    Type: String
+#    Default: 'Ernie Van Duyne'
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 192.168.0.0/19
+      EnableDnsSupport: false
+      EnableDnsHostnames: false
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: EVD-QA-CLI-VPC
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA

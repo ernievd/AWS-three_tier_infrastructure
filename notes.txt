@@ -1,0 +1,21 @@
+To create a CloudFormation stack use the following command :
+aws cloudformation create-stack --stack-name QA-trial-Stack --template-body file://vpc.yml --region us-east-1
+
+To create a CloudFormation stack with a parameters file you use the following command :
+aws cloudformation create-stack --stack-name QA-trial-Stack --template-body file://vpc.yml --parameters file://qa-parameters.json --region us-east-1
+
+
+
+To update the CloudFormation stack with a parameters file you use the following command :
+aws cloudformation update-stack --stack-name QA-trial-Stack --template-body file://./vpc.yaml --parameters file://./qa-parameters.json --region us-east-1
+
+Example to use other defaults stored in your AWS config (~/.aws/config) :
+aws cloudformation update-stack --stack-name QA-trial-Stack --template-body file://./vpc.yaml --parameters file://./qa-parameters.json --profile qa-profile --region us-east-1
+
+
+
+
+
+To delete a stack:
+** NOTE - always include the region flag in all commands!! Errors will not be generated if there is a mismatch - for example if your AWS config has a different region then what you are working on
+aws cloudformation delete-stack --stack-name QA-trial-Stack --region us-east-1
