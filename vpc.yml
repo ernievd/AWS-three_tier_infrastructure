@@ -67,7 +67,7 @@ Resources:
       CidrBlock: 192.168.6.0/23
       Tags:
         - Key: Name
-          Value: QA DMZ Public AZ-1b--CF
+          Value: QA Public Subnet AZ-1b--CF
         - Key: Owner
           Value: Ernie Van Duyne
         - Key: Environment
