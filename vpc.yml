@@ -98,3 +98,18 @@ Resources:
           Value: Ernie Van Duyne
         - Key: Environment
           Value: QA CloudFormation
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: QA-Internet-Gateway--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
