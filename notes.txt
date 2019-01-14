@@ -1,8 +1,21 @@
+Websites used to help with Cloudformation template -
+https://sookocheff.com/post/aws/how-to-create-a-vpc-using-cloudformation/
+https://blog.boltops.com/2018/02/14/aws-cloudformation-declarative-infrastructure-code-tutorial
+https://docs.aws.amazon.com/codebuild/latest/userguide/cloudformation-vpc-template.html
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/updating.stacks.walkthrough.html
+https://dzone.com/articles/how-to-painlessly-create-and-update-a-cloudformati
+
+SUBNETS - keep in mind the difference between update and deploy
+
+
 To create a CloudFormation stack use the following command :
 aws cloudformation create-stack --stack-name QA-trial-Stack --template-body file://vpc.yml --region us-east-1
 
 To create a CloudFormation stack with a parameters file you use the following command :
-aws cloudformation create-stack --stack-name QA-trial-Stack --template-body file://vpc.yml --parameters file://qa-parameters.json --region us-east-1
+aws cloudformation create-stack --stack-name QA-trial-Stack--CF --template-body file://vpc.yml --parameters file://qa-parameters.json --region us-east-1
+
+To update a stack:
+aws cloudformation update-stack --stack-name QA-trial-Stack--CF --template-body file://vpc.yml --region us-east-1
 
 
 
@@ -11,7 +24,6 @@ aws cloudformation update-stack --stack-name QA-trial-Stack --template-body file
 
 Example to use other defaults stored in your AWS config (~/.aws/config) :
 aws cloudformation update-stack --stack-name QA-trial-Stack --template-body file://./vpc.yaml --parameters file://./qa-parameters.json --profile qa-profile --region us-east-1
-
 
 
 
