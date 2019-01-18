@@ -101,6 +101,7 @@ Resources:
           Value: Ernie Van Duyne
         - Key: Environment
           Value: QA CloudFormation
+
   # Create an Internet Gateway
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -118,6 +119,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
+
   # Main Route table creation
   MainRouteTable:
     Type: AWS::EC2::RouteTable
@@ -133,6 +135,7 @@ Resources:
       RouteTableId: !Ref MainRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
+
   # DMZ Route table creation
   DMZRouteTable:
     Type: AWS::EC2::RouteTable
@@ -159,6 +162,7 @@ Resources:
     Properties:
       RouteTableId: !Ref DMZRouteTable
       SubnetId: !Ref DMZSubnet1b
+
   # Public Route table creation
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -174,7 +178,7 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-  # Associate the Public Subnets to the DMZ route table
+  # Associate the Public Subnets to the public route table
   PublicSubnet1aRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -185,3 +189,32 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet1b
+
+  # Create Elastic IPs needed for NAT Gateways
+  QANatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      Domain: vpc
+  QANatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      Domain: vpc
+  # Create NAT Gateways - associate them to a public subnet so they can reach the internet when needed
+  NATGatewayAZ1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt QANatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1a
+      Tags:
+        - Key: Name
+          Value: QA-NAT_Gateway-AZ1--CF
+  NATGatewayAZ2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt QANatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1b
+      Tags:
+        - Key: Name
+          Value: QA-NAT_Gateway-AZ2--CF
