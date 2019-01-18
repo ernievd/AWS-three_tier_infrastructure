@@ -141,10 +141,21 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-DMZRouteTable--CF
-    # Create a public route for the DMZ route table linked to the internet gateway so the DMZ table can reach the internet
+  # Create a public route for the DMZ route table linked to the internet gateway so the DMZ table can reach the internet
   DMZPublicRoute:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref DMZRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
+  # Associate the DMZ Subnets to the DMZ route table
+  DMZSubnet1aRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref DMZRouteTable
+      SubnetId: !Ref DMZSubnet1a
+  DMZSubnet1bRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref DMZRouteTable
+      SubnetId: !Ref DMZSubnet1b
