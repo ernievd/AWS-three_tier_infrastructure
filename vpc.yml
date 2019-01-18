@@ -218,3 +218,47 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-NAT_Gateway-AZ2--CF
+
+  # Private Route table creation for availability zone 1
+  PrivateRouteTableAZ1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: QA-Private-RouteTable-AZ1--CF
+  # Create a private route for the private route table linked to the NAT so the public table can reach the internet
+  PrivateNATRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableAZ1
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref NATGatewayAZ1
+  PrivateSubnet1aRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableAZ1
+      SubnetId: !Ref PrivateSubnet1a
+
+
+  # Private Route table creation for availability zone 2
+  PrivateRouteTableAZ2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: QA-Private-RouteTable-AZ2--CF
+  # Create a private route for the private route table linked to the NAT so the public table can reach the internet
+  PrivateNATRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableAZ2
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref NATGatewayAZ2
+  PrivateSubnet1bRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableAZ2
+      SubnetId: !Ref PrivateSubnet1b
+####Recheck********Private
