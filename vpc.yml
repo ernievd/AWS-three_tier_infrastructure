@@ -6,6 +6,7 @@ Description: 'A CloudFormation template to form a VPC for our tutorial'
 #    Type: String
 #    Default: 'Ernie Van Duyne'
 Resources:
+  # Virtual Private Network creation
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -20,6 +21,8 @@ Resources:
           Value: Ernie Van Duyne
         - Key: Environment
           Value: QA CloudFormation
+  # Now we create all the subnets needed  - DMZ, private and public.
+  #   We create two of each - We want to use two availability zones to be redundant in case one zone goes down
   DMZSubnet1a:
     Type: AWS::EC2::Subnet
     Properties:
@@ -98,6 +101,7 @@ Resources:
           Value: Ernie Van Duyne
         - Key: Environment
           Value: QA CloudFormation
+  # Create an Internet Gateway
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -108,11 +112,13 @@ Resources:
           Value: Ernie Van Duyne
         - Key: Environment
           Value: QA CloudFormation
+  # Attach the Gateway to the VPC
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
+  # Main Route table creation
   MainRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -120,9 +126,25 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-RoutingTable--CF
+  # Create a public route for the main route table linked to the internet gateway so the main table can reach the internet
   PublicRoute:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref MainRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  # Main Route table creation
+  DMZRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: QA-DMZRouteTable--CF
+    # Create a public route for the DMZ route table linked to the internet gateway so the DMZ table can reach the internet
+  DMZPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref DMZRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
