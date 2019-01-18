@@ -16,6 +16,10 @@ Resources:
       Tags:
         - Key: Name
           Value: EVD-QA-VPC--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
   DMZSubnet1a:
     Type: AWS::EC2::Subnet
     Properties:
@@ -25,6 +29,11 @@ Resources:
       Tags:
         - Key: Name
           Value: QA DMZ Subnet AZ-1a--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
+  DMZSubnet1b:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: us-east-1b
@@ -33,6 +42,10 @@ Resources:
       Tags:
         - Key: Name
           Value: QA DMZ Subnet AZ-1b--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
   PublicSubnet1a:
       Type: AWS::EC2::Subnet
       Properties:
@@ -42,6 +55,10 @@ Resources:
         Tags:
           - Key: Name
             Value: QA Public Subnet AZ-1a--CF
+          - Key: Owner
+            Value: Ernie Van Duyne
+          - Key: Environment
+            Value: QA CloudFormation
   PublicSubnet1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -51,6 +68,10 @@ Resources:
       Tags:
         - Key: Name
           Value: QA Public Subnet AZ-1b--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
   PrivateSubnet1a:
     Type: AWS::EC2::Subnet
     Properties:
@@ -60,6 +81,10 @@ Resources:
       Tags:
         - Key: Name
           Value: QA Private Subnet AZ-1a--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
   PrivateSubnet1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -69,17 +94,25 @@ Resources:
       Tags:
         - Key: Name
           Value: QA Private Subnet AZ-1b--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
           Value: QA-Internet-Gateway--CF
+        - Key: Owner
+          Value: Ernie Van Duyne
+        - Key: Environment
+          Value: QA CloudFormation
   VPCGatewayAttachment:
-      Type: AWS::EC2::VPCGatewayAttachment
-      Properties:
-        VpcId: !Ref VPC
-        InternetGatewayId: !Ref InternetGateway
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
   MainRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -87,3 +120,9 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-RoutingTable--CF
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref MainRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
