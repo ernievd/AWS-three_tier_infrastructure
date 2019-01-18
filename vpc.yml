@@ -133,7 +133,7 @@ Resources:
       RouteTableId: !Ref MainRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-  # Main Route table creation
+  # DMZ Route table creation
   DMZRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -159,3 +159,29 @@ Resources:
     Properties:
       RouteTableId: !Ref DMZRouteTable
       SubnetId: !Ref DMZSubnet1b
+  # Public Route table creation
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: QA-PublicRouteTable--CF
+  # Create a public route for the public route table linked to the internet gateway so the public table can reach the internet
+  PublicPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  # Associate the Public Subnets to the DMZ route table
+  PublicSubnet1aRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1a
+  PublicSubnet1bRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1b
