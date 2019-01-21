@@ -55,6 +55,7 @@ Resources:
         AvailabilityZone: us-east-1a
         VpcId: !Ref VPC
         CidrBlock: 192.168.4.0/23
+        MapPublicIpOnLaunch: true
         Tags:
           - Key: Name
             Value: QA Public Subnet AZ-1a--CF
@@ -68,6 +69,7 @@ Resources:
       AvailabilityZone: us-east-1b
       VpcId: !Ref VPC
       CidrBlock: 192.168.6.0/23
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: QA Public Subnet AZ-1b--CF
