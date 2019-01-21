@@ -233,13 +233,12 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableAZ1
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref NATGatewayAZ1
+      NatGatewayId: !Ref NATGatewayAZ1
   PrivateSubnet1aRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableAZ1
       SubnetId: !Ref PrivateSubnet1a
-
 
   # Private Route table creation for availability zone 2
   PrivateRouteTableAZ2:
@@ -255,10 +254,9 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableAZ2
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref NATGatewayAZ2
+      NatGatewayId: !Ref NATGatewayAZ2
   PrivateSubnet1bRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableAZ2
       SubnetId: !Ref PrivateSubnet1b
-####Recheck********Private
