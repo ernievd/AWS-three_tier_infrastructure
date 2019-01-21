@@ -262,3 +262,37 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableAZ2
       SubnetId: !Ref PrivateSubnet1b
+
+# Create a security group
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 74.94.81.157/32
+
+# Create an EC2 Instance
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: 'udemy-ec2'
+      ImageId: ami-035be7bafff33b6b6 # AMI us-east-1
+      SecurityGroupIds:
+        #- !GetAtt InstanceSecurityGroup.GroupId
+        - !Ref InstanceSecurityGroup
+      SubnetId:
+        Ref: PublicSubnet1a
+      Tags:
+        - Key: Name
+          Value: QA-Public EC2 AZ1a--CF
+
+Outputs:
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value:
+      Ref: EC2Instance
