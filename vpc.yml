@@ -286,12 +286,17 @@ Resources:
   myEC2RoleRolePolicies:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: QA-EC2-AllowAllPolicy--CF
+      PolicyName: QAs3BuildAccessPolicyCF
       PolicyDocument:
         Statement:
         - Effect: Allow
-          Action: "*"
-          Resource: "*"
+          #Action: "*"
+          #Resource: "*"
+          Action:
+            - s3:*
+          Resource:
+            - arn:aws:s3:::qa-storage--dashboard/*
+            - arn:aws:s3:::qa-storage--dashboard
       Roles:
       - Ref: QAEC2RoleCF
 
