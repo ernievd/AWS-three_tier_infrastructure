@@ -358,6 +358,35 @@ Resources:
   #                  - </h2>" >> /var/www/index.html
   #            - echo "</body></html>" >> /var/www/index.html
 
+  EC2Instance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: 'udemy-ec2'
+      ImageId: ami-035be7bafff33b6b6 # AMI us-east-1
+      SecurityGroupIds:
+        #- !GetAtt InstanceSecurityGroup.GroupId
+        - !Ref InstanceSecurityGroup
+      SubnetId:
+        Ref: PublicSubnet1b
+      IamInstanceProfile:
+        Ref: myEC2RoleInstanceProfile
+      Tags:
+        - Key: Name
+          Value: QA-EC2-ApplicationServer1-Zone1b—CF
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - "\n"
+            - - "#!/bin/bash"
+              - sudo su
+              - yum update -y
+              - yum install httpd php -y
+              - cd /var/www/html
+              - aws s3 cp s3://qa-storage--dashboard/builds/application_prod.zip application_prod.zip
+              - unzip application_prod.zip
+              - rm -rf application_prod.zip
+              - sudo service httpd start
 
 # Good EC2 instance example
 #  ServiceInstance:
