@@ -333,14 +333,48 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-EC2-ApplicationServer1-Zone1a—CF
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - "\n"
+            - - "#!/bin/bash"
+              - sudo su
+              - yum update -y
+              - yum install httpd php -y
+              - cd /var/www/html
+              - aws s3 cp s3://qa-storage--dashboard/builds/application_prod.zip application_prod.zip
+              - unzip application_prod.zip
+              - rm -rf application_prod.zip
+              - sudo service httpd start
+  #            - Fn::Join:
+  #                - ''
+  #                - - 'echo "<h2>Environment: '
+  #                  - Ref: Environment
+  #                  - </h2>" >> /var/www/index.html
+  #            - Fn::Join:
+  #                - ''
+  #                - - 'echo "<h2>Role: '
+  #                  - Ref: Role
+  #                  - </h2>" >> /var/www/index.html
+  #            - echo "</body></html>" >> /var/www/index.html
 
 
 
-
-Outputs:
-  InstanceId:
-    Description: InstanceId of the newly created EC2 instance
-    Value:
-      Ref: EC2Instance
-
-      #### CREATE EC2 IAM ROLE
+# Good EC2 instance example
+#  ServiceInstance:
+#    Type: "AWS::EC2::Instance"
+#    Properties:
+#      InstanceType: !Ref InstanceType
+#      IamInstanceProfile: !Ref InstanceProfile
+#      UserData:
+#        'Fn::Base64': !Sub |
+#          #cloud-config
+#          write_files:
+#          - path: /etc/sysconfig/cloudformation
+#            permissions: 0644
+#            owner: root
+#            content: |
+#              STACK_NAME=${AWS::StackName}
+#              AWS_REGION=${AWS::Region}
+#          runcmd:
+#          - aws s3 cp s3://${ArtifactsBucketName}/dd-get-secrets.py /home/ec2-user/dd-get-secrets.py
