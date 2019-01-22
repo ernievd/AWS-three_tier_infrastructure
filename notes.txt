@@ -9,7 +9,7 @@ SUBNETS - keep in mind the difference between update and deploy
 
 
 To create a CloudFormation stack use the following command :
-aws cloudformation create-stack --stack-name QA-trial-Stack --template-body file://vpc.yml --region us-east-1
+aws cloudformation create-stack --stack-name QA-trial-Stack --template-body file://vpc.yml --region us-east-1 --capabilities CAPABILITY_IAM
 
 To create a CloudFormation stack with a parameters file you use the following command :
 aws cloudformation create-stack --stack-name QA-trial-Stack--CF --template-body file://vpc.yml --parameters file://qa-parameters.json --region us-east-1

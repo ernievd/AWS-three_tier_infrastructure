@@ -291,8 +291,44 @@ Resources:
         - Key: Name
           Value: QA-Public EC2 AZ1a--CF
 
+# Create IAM Role and policy
+  ## NOTE - you have to tell AWS that you are OK with creating an IAM by adding "--capabilities CAPABILITY_IAM" to the deploy command.
+  QAEC2RoleCF:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+  myEC2RoleInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: QAEC2RoleCF
+  myEC2RoleRolePolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: QA-EC2-AllowAllPolicy--CF
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action: "*"
+          Resource: "*"
+      Roles:
+      - Ref: QAEC2RoleCF
+
+
+
 Outputs:
   InstanceId:
     Description: InstanceId of the newly created EC2 instance
     Value:
       Ref: EC2Instance
+
+      #### CREATE EC2 IAM ROLE
