@@ -388,6 +388,90 @@ Resources:
               - rm -rf application_prod.zip
               - sudo service httpd start
 
+# Create a security group
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable Loadbalancer access via port 80
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+#  MyLoadBalancer:
+#    Type: AWS::ElasticLoadBalancing::LoadBalancer
+#    Properties:
+#      #Name: QAAppLoadBalancerCF
+#      Scheme: internet-facing
+#      #AvailabilityZones:
+#      #- "us-east-1a"
+#      #- "us-east-1b"
+#      Instances:
+#      - Ref: EC2Instance
+#      - Ref: EC2Instance2
+#      Subnets:
+#        - Ref: DMZSubnet1a
+#        - Ref: DMZSubnet1b
+#      SecurityGroups:
+#        - Ref: LoadBalancerSecurityGroup
+#      Listeners:
+#      - LoadBalancerPort: '80'
+#        InstancePort: '80'
+#        Protocol: HTTP
+#      HealthCheck:
+#        Target: HTTP:80/
+#        HealthyThreshold: '3'
+#        UnhealthyThreshold: '5'
+#        Interval: '30'
+#        Timeout: '5'
+
+  Terra10NetworkLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Listeners:
+      - LoadBalancerPort: '80'
+        InstancePort: '80'
+        Protocol: HTTP
+#      SecurityGroups:
+#        - Ref: LoadBalancerSecurityGroup
+      Name: t10-networkloadbalancer
+      Scheme: internet-facing
+      Subnets:
+        - Ref: DMZSubnet1a
+        - Ref: DMZSubnet1b
+      Type: network
+      Tags:
+        - Key: Name
+          Value: QA-LoadBalancer--CF
+  Terra10NetworkLoadBalancerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: t10-networklb-target
+      Port: 80
+      Protocol: TCP
+      VpcId: !Ref VPC
+#      SecurityGroups:
+#        - Ref: LoadBalancerSecurityGroup
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+#      Targets:
+#      - Id: !Ref EC2Instance
+#        Port: 80
+#      - Id: !Ref EC2Instance2
+#        Port: 80
+      Tags:
+        - Key: Name
+          Value: QA-TargetGroup--CF
+
+
+
+           ### TODO - Security group and Listeners
+
+
+
 # Good EC2 instance example
 #  ServiceInstance:
 #    Type: "AWS::EC2::Instance"
