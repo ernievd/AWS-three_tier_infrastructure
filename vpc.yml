@@ -359,7 +359,6 @@ Resources:
   #            - echo "</body></html>" >> /var/www/index.html
 
 
-
 # Good EC2 instance example
 #  ServiceInstance:
 #    Type: "AWS::EC2::Instance"
