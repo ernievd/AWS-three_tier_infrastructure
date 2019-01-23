@@ -400,6 +400,102 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
 
+
+#################################################################
+
+  LoadBalancerSG: #This security group allows us to whitelist traffic from the internet to our load balancer
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Load balancer security group"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: 80
+          ToPort: 80
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: 443
+          ToPort: 443
+#  AppSG: #This security group holds the application
+#    Type: "AWS::EC2::SecurityGroup"
+#    Properties:
+#      GroupDescription: "Application security group"
+#      VpcId: !Ref VpcId
+#      SecurityGroupIngress:
+#        - IpProtocol: "tcp"
+#          SourceSecurityGroupId: !Ref LoadBalancerSG
+#          FromPort: 1
+#          ToPort: 65000
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      Subnets:
+        - Ref: DMZSubnet1a
+        - Ref: DMZSubnet1b
+      SecurityGroups:
+        - !Ref LoadBalancerSG
+  LBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - LoadBalancer
+      - TargetGroup
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn:
+      - LoadBalancer
+    Properties:
+#      TargetType: ip #the default is "instance" but we must use ip to forward to fargate
+      Targets:
+        - Id: !Ref EC2Instance
+          Port: 80
+        - Id: !Ref EC2Instance2
+          Port: 80
+      VpcId: !Ref VPC
+      Protocol: HTTP # do not change to HTTPS
+      Port: 3000
+#      HealthCheckPath: /hello
+#      HealthCheckIntervalSeconds: 10
+#      HealthCheckTimeoutSeconds: 5
+#      HealthyThresholdCount: 2
+#      UnhealthyThresholdCount: 2
+      TargetGroupAttributes:
+        - Key:  deregistration_delay.timeout_seconds
+          Value:  30
+
+
+################################################################
+#Terra10NetworkLoadBalancerTargetGroup:
+#  Type: AWS::ElasticLoadBalancingV2::TargetGroup
+#  Properties:
+#    Name: t10-networklb-target
+#    Port: 80
+#    Protocol: TCP
+#    VpcId: !Ref VPC
+#    TargetGroupAttributes:
+#      - Key: deregistration_delay.timeout_seconds
+#        Value: 60
+#    Targets:
+#    - Id: !Ref EC2Instance
+#      Port: 80
+#    - Id: !Ref EC2Instance2
+#      Port: 80
+#    Tags:
+#      - Key: Name
+#        Value: QA-TargetGroup--CF
+
+
+
+##################################################################
+
 #  MyLoadBalancer:
 #    Type: AWS::ElasticLoadBalancing::LoadBalancer
 #    Properties:
@@ -427,44 +523,8 @@ Resources:
 #        Interval: '30'
 #        Timeout: '5'
 
-  Terra10NetworkLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
-    Properties:
-      Listeners:
-      - LoadBalancerPort: '80'
-        InstancePort: '80'
-        Protocol: HTTP
-#      SecurityGroups:
-#        - Ref: LoadBalancerSecurityGroup
-      Name: t10-networkloadbalancer
-      Scheme: internet-facing
-      Subnets:
-        - Ref: DMZSubnet1a
-        - Ref: DMZSubnet1b
-      Type: network
-      Tags:
-        - Key: Name
-          Value: QA-LoadBalancer--CF
-  Terra10NetworkLoadBalancerTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: t10-networklb-target
-      Port: 80
-      Protocol: TCP
-      VpcId: !Ref VPC
-#      SecurityGroups:
-#        - Ref: LoadBalancerSecurityGroup
-      TargetGroupAttributes:
-        - Key: deregistration_delay.timeout_seconds
-          Value: 60
-#      Targets:
-#      - Id: !Ref EC2Instance
-#        Port: 80
-#      - Id: !Ref EC2Instance2
-#        Port: 80
-      Tags:
-        - Key: Name
-          Value: QA-TargetGroup--CF
+
+
 
 
 
