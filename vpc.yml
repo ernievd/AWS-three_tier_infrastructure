@@ -307,11 +307,6 @@ Resources:
       GroupDescription: Enable SSH access via port 22
       VpcId: !Ref VPC
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 74.94.81.157/32
-      SecurityGroupIngress:
         - SourceSecurityGroupId: !Ref LoadBalancerSG
           IpProtocol: tcp
           FromPort: 80
