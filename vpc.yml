@@ -388,21 +388,7 @@ Resources:
               - rm -rf application_prod.zip
               - sudo service httpd start
 
-# Create a security group
-  LoadBalancerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Enable Loadbalancer access via port 80
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-
-
-#################################################################
-
+# Create a load balancer security group
   LoadBalancerSG: #This security group allows us to whitelist traffic from the internet to our load balancer
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -417,19 +403,12 @@ Resources:
           CidrIp: "0.0.0.0/0"
           FromPort: 443
           ToPort: 443
-#  AppSG: #This security group holds the application
-#    Type: "AWS::EC2::SecurityGroup"
-#    Properties:
-#      GroupDescription: "Application security group"
-#      VpcId: !Ref VpcId
-#      SecurityGroupIngress:
-#        - IpProtocol: "tcp"
-#          SourceSecurityGroupId: !Ref LoadBalancerSG
-#          FromPort: 1
-#          ToPort: 65000
+
+# Create an application load balancer
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
+      Name: QAAppLoadBalancerCF
       Scheme: internet-facing
       Subnets:
         - Ref: DMZSubnet1a
@@ -448,6 +427,8 @@ Resources:
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
       Protocol: HTTP
+
+ # Create a target group to be used with the load balancer
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
@@ -472,65 +453,11 @@ Resources:
           Value:  30
 
 
-################################################################
-#Terra10NetworkLoadBalancerTargetGroup:
-#  Type: AWS::ElasticLoadBalancingV2::TargetGroup
-#  Properties:
-#    Name: t10-networklb-target
-#    Port: 80
-#    Protocol: TCP
-#    VpcId: !Ref VPC
-#    TargetGroupAttributes:
-#      - Key: deregistration_delay.timeout_seconds
-#        Value: 60
-#    Targets:
-#    - Id: !Ref EC2Instance
-#      Port: 80
-#    - Id: !Ref EC2Instance2
-#      Port: 80
-#    Tags:
-#      - Key: Name
-#        Value: QA-TargetGroup--CF
-
-
-
-##################################################################
-
-#  MyLoadBalancer:
-#    Type: AWS::ElasticLoadBalancing::LoadBalancer
-#    Properties:
-#      #Name: QAAppLoadBalancerCF
-#      Scheme: internet-facing
-#      #AvailabilityZones:
-#      #- "us-east-1a"
-#      #- "us-east-1b"
-#      Instances:
-#      - Ref: EC2Instance
-#      - Ref: EC2Instance2
-#      Subnets:
-#        - Ref: DMZSubnet1a
-#        - Ref: DMZSubnet1b
-#      SecurityGroups:
-#        - Ref: LoadBalancerSecurityGroup
-#      Listeners:
-#      - LoadBalancerPort: '80'
-#        InstancePort: '80'
-#        Protocol: HTTP
-#      HealthCheck:
-#        Target: HTTP:80/
-#        HealthyThreshold: '3'
-#        UnhealthyThreshold: '5'
-#        Interval: '30'
-#        Timeout: '5'
 
 
 
 
-
-
-           ### TODO - Security group and Listeners
-
-
+################### NOTES ##################
 
 # Good EC2 instance example
 #  ServiceInstance:
