@@ -307,14 +307,42 @@ Resources:
       GroupDescription: Enable SSH access via port 22
       VpcId: !Ref VPC
       SecurityGroupIngress:
-        - SourceSecurityGroupId: !Ref LoadBalancerSG
-          IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+#        - SourceSecurityGroupId: !Ref LoadBalancerSG
+#          IpProtocol: tcp
+#          FromPort: 80
+#          ToPort: 80
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: 74.94.81.157/32
+
+  SGBaseIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    DependsOn:
+      - InstanceSecurityGroup
+      - LoadBalancerSG
+    Properties:
+      Description: Secures traffic to be allowed in the InstanceSecurityGroup to be from the LoadBalancerSG
+#      GroupName: !Ref InstanceSecurityGroup
+#  NOTE - Can not use GroupName - used GroupId and got the Id by using GetAtt
+      GroupId: !GetAtt InstanceSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !Ref LoadBalancerSG
+
+  SGBaseEgress:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    DependsOn:
+      - InstanceSecurityGroup
+      - LoadBalancerSG
+    Properties:
+      Description: Secures traffic to be allowed out of the LoadBalancerSG to the InstanceSecurityGroup
+      GroupId: !GetAtt LoadBalancerSG.GroupId
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !Ref InstanceSecurityGroup
 
 # Create an EC2 Instance
   EC2Instance:
@@ -392,7 +420,7 @@ Resources:
   LoadBalancerSG: #This security group allows us to whitelist traffic from the internet to our load balancer
     Type: "AWS::EC2::SecurityGroup"
     Properties:
-      GroupDescription: "Load balancer security group"
+      GroupDescription: Load balancer security group
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: "tcp"
