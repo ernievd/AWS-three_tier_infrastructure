@@ -311,10 +311,15 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 74.94.81.157/32
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref LoadBalancerSG
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
         - IpProtocol: tcp
-          FromPort: '80'
-          ToPort: '80'
-          CidrIp: 0.0.0.0/0
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 74.94.81.157/32
 
 # Create an EC2 Instance
   EC2Instance:
@@ -403,6 +408,9 @@ Resources:
           CidrIp: "0.0.0.0/0"
           FromPort: 443
           ToPort: 443
+      Tags:
+        - Key: Name
+          Value: loadbalancersecurityGroupcf
 
 # Create an application load balancer
   LoadBalancer:
@@ -415,6 +423,8 @@ Resources:
         - Ref: DMZSubnet1b
       SecurityGroups:
         - !Ref LoadBalancerSG
+
+# Create a load balancer listener
   LBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
@@ -451,6 +461,9 @@ Resources:
       TargetGroupAttributes:
         - Key:  deregistration_delay.timeout_seconds
           Value:  30
+      Tags:
+        - Key: Name
+          Value: qaloadbalancertargetGroupcf
 
 
 
