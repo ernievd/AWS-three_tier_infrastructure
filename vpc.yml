@@ -21,6 +21,7 @@ Resources:
           Value: Ernie Van Duyne
         - Key: Environment
           Value: QA CloudFormation
+
   # Now we create all the subnets needed  - DMZ, private and public.
   #   We create two of each - We want to use two availability zones to be redundant in case one zone goes down
   DMZSubnet1a:
@@ -115,6 +116,7 @@ Resources:
           Value: Ernie Van Duyne
         - Key: Environment
           Value: QA CloudFormation
+
   # Attach the Gateway to the VPC
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -130,6 +132,7 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-RoutingTable--CF
+
   # Create a public route for the main route table linked to the internet gateway so the main table can reach the internet
   PublicRoute:
     Type: AWS::EC2::Route
@@ -146,6 +149,7 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-DMZRouteTable--CF
+
   # Create a public route for the DMZ route table linked to the internet gateway so the DMZ table can reach the internet
   DMZPublicRoute:
     Type: AWS::EC2::Route
@@ -153,7 +157,8 @@ Resources:
       RouteTableId: !Ref DMZRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-  # Associate the DMZ Subnets to the DMZ route table
+
+  # Associate the DMZ Subnets to the DMZ route table  AWS::EC2::SubnetRouteTableAssociation
   DMZSubnet1aRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -173,6 +178,7 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-PublicRouteTable--CF
+
   # Create a public route for the public route table linked to the internet gateway so the public table can reach the internet
   PublicPublicRoute:
     Type: AWS::EC2::Route
@@ -180,7 +186,8 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-  # Associate the Public Subnets to the public route table
+
+  # Associate the Public Subnets to the public route table - AWS::EC2::SubnetRouteTableAssociation
   PublicSubnet1aRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -203,6 +210,7 @@ Resources:
     DependsOn: VPCGatewayAttachment
     Properties:
       Domain: vpc
+
   # Create NAT Gateways - associate them to a public subnet so they can reach the internet when needed
   NATGatewayAZ1:
     Type: AWS::EC2::NatGateway
@@ -229,6 +237,9 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-Private-RouteTable-AZ1--CF
+
+
+
   # Create a private route for the private route table linked to the NAT so the public table can reach the internet
   PrivateNATRoute1:
     Type: AWS::EC2::Route
@@ -236,13 +247,15 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableAZ1
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NATGatewayAZ1
+
+ #   AWS::EC2::SubnetRouteTableAssociation
   PrivateSubnet1aRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableAZ1
       SubnetId: !Ref PrivateSubnet1a
 
-  # Private Route table creation for availability zone 2
+  # Private Route table creation for availability zone 2 - AWS::EC2::RouteTable
   PrivateRouteTableAZ2:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -250,6 +263,8 @@ Resources:
       Tags:
         - Key: Name
           Value: QA-Private-RouteTable-AZ2--CF
+
+
   # Create a private route for the private route table linked to the NAT so the public table can reach the internet
   PrivateNATRoute2:
     Type: AWS::EC2::Route
@@ -257,6 +272,8 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableAZ2
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NATGatewayAZ2
+
+ # AWS::EC2::SubnetRouteTableAssociation
   PrivateSubnet1bRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -277,12 +294,16 @@ Resources:
           Action:
           - sts:AssumeRole
       Path: "/"
+
+  # AWS::IAM::InstanceProfile
   myEC2RoleInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: "/"
       Roles:
       - Ref: QAEC2RoleCF
+
+  # AWS::IAM::Policy
   myEC2RoleRolePolicies:
     Type: AWS::IAM::Policy
     Properties:
@@ -316,6 +337,7 @@ Resources:
           ToPort: 22
           CidrIp: 74.94.81.157/32
 
+ # AWS::EC2::SecurityGroupIngress
   SGBaseIngress:
     Type: 'AWS::EC2::SecurityGroupIngress'
     DependsOn:
@@ -331,6 +353,7 @@ Resources:
       ToPort: 80
       SourceSecurityGroupId: !Ref LoadBalancerSG
 
+ # AWS::EC2::SecurityGroupEgress
   SGBaseEgress:
     Type: 'AWS::EC2::SecurityGroupEgress'
     DependsOn:
@@ -343,78 +366,6 @@ Resources:
       FromPort: 80
       ToPort: 80
       SourceSecurityGroupId: !Ref InstanceSecurityGroup
-
-# Create an EC2 Instance
-  EC2Instance:
-    Type: AWS::EC2::Instance
-    Properties:
-      InstanceType: t2.micro
-      KeyName: 'udemy-ec2'
-      ImageId: ami-035be7bafff33b6b6 # AMI us-east-1
-      SecurityGroupIds:
-        #- !GetAtt InstanceSecurityGroup.GroupId
-        - !Ref InstanceSecurityGroup
-      SubnetId:
-        Ref: PublicSubnet1a
-      IamInstanceProfile:
-        Ref: myEC2RoleInstanceProfile
-      Tags:
-        - Key: Name
-          Value: QA-EC2-ApplicationServer1-Zone1a—CF
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - "\n"
-            - - "#!/bin/bash"
-              - sudo su
-              - yum update -y
-              - yum install httpd php -y
-              - cd /var/www/html
-              - aws s3 cp s3://qa-storage--dashboard/builds/application_prod.zip application_prod.zip
-              - unzip application_prod.zip
-              - rm -rf application_prod.zip
-              - sudo service httpd start
-  #            - Fn::Join:
-  #                - ''
-  #                - - 'echo "<h2>Environment: '
-  #                  - Ref: Environment
-  #                  - </h2>" >> /var/www/index.html
-  #            - Fn::Join:
-  #                - ''
-  #                - - 'echo "<h2>Role: '
-  #                  - Ref: Role
-  #                  - </h2>" >> /var/www/index.html
-  #            - echo "</body></html>" >> /var/www/index.html
-
-  EC2Instance2:
-    Type: AWS::EC2::Instance
-    Properties:
-      InstanceType: t2.micro
-      KeyName: 'udemy-ec2'
-      ImageId: ami-035be7bafff33b6b6 # AMI us-east-1
-      SecurityGroupIds:
-        #- !GetAtt InstanceSecurityGroup.GroupId
-        - !Ref InstanceSecurityGroup
-      SubnetId:
-        Ref: PublicSubnet1b
-      IamInstanceProfile:
-        Ref: myEC2RoleInstanceProfile
-      Tags:
-        - Key: Name
-          Value: QA-EC2-ApplicationServer1-Zone1b—CF
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - "\n"
-            - - "#!/bin/bash"
-              - sudo su
-              - yum update -y
-              - yum install httpd php -y
-              - cd /var/www/html
-              - aws s3 cp s3://qa-storage--dashboard/builds/application_prod.zip application_prod.zip
-              - unzip application_prod.zip
-              - rm -rf application_prod.zip
-              - sudo service httpd start
 
 # Create a load balancer security group
   LoadBalancerSG: #This security group allows us to whitelist traffic from the internet to our load balancer
@@ -450,48 +401,95 @@ Resources:
 # Create a load balancer listener
   LBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - LoadBalancer
-      - TargetGroup
     Properties:
       DefaultActions:
-      - Type: forward
-        TargetGroupArn: !Ref TargetGroup
+        - Type: forward
+          TargetGroupArn:
+            Ref: ALBTargetGroup
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
       Protocol: HTTP
 
- # Create a target group to be used with the load balancer
-  TargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    DependsOn:
-      - LoadBalancer
+
+# AWS::AutoScaling::LaunchConfiguration
+  AppLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    DependsOn: VPCGatewayAttachment
     Properties:
-#      TargetType: ip #the default is "instance" but we must use ip to forward to fargate
-      Targets:
-        - Id: !Ref EC2Instance
-          Port: 80
-        - Id: !Ref EC2Instance2
-          Port: 80
+      KeyName: 'udemy-ec2'
+      AssociatePublicIpAddress: true
+      ImageId:  ami-035be7bafff33b6b6 # AMI us-east-1
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !Ref InstanceSecurityGroup
+      IamInstanceProfile:
+        Ref: myEC2RoleInstanceProfile
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - "\n"
+            - - "#!/bin/bash"
+              - sudo su
+              - yum update -y
+              - yum install httpd php -y
+              - cd /var/www/html
+              - aws s3 cp s3://qa-storage--dashboard/builds/application_prod.zip application_prod.zip
+              - unzip application_prod.zip
+              - rm -rf application_prod.zip
+              - sudo service httpd start
+
+# AWS::AutoScaling::AutoScalingGroup
+  AppASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - Ref: DMZSubnet1a
+        - Ref: DMZSubnet1b
+      LaunchConfigurationName:
+        Ref: AppLaunchConfiguration
+#      AvailabilityZones:
+#        - !GetAtt PublicSubnet1a.AvailabilityZone
+#        - !GetAtt PublicSubnet1b.AvailabilityZone
+      DesiredCapacity: 2
+      #LoadBalancerNames:
+      #- Ref: LoadBalancer
+      MaxSize: 5
+      MinSize: 2
+      TargetGroupARNs:
+      - !Ref ALBTargetGroup
+#      LoadBalancerNames:
+#        - Ref: LoadBalancer
+
+#AWS::ElasticLoadBalancingV2::TargetGroup
+  ALBTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
       VpcId: !Ref VPC
-      Protocol: HTTP # do not change to HTTPS
-      Port: 3000
-#      HealthCheckPath: /hello
-#      HealthCheckIntervalSeconds: 10
-#      HealthCheckTimeoutSeconds: 5
-#      HealthyThresholdCount: 2
-#      UnhealthyThresholdCount: 2
-      TargetGroupAttributes:
-        - Key:  deregistration_delay.timeout_seconds
-          Value:  30
-      Tags:
-        - Key: Name
-          Value: qaloadbalancertargetGroupcf
 
 
+#      VPCZoneIdentifier:
+#        - Ref: PublicSubnet1a
+#        - Ref: PublicSubnet1b
+#    UpdatePolicy:
+#      AutoScalingRollingUpdate:
+#        MinInstancesInService: 1
+
+##
+#  https://github:
+#    com/aws-samples/aws-code-snippets/blob/master/CloudFormation/ECS:
+#      md:
+  ### How do I associate this with my load balancer???
+  ## Look at get att - https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html
+  ## get all metadata
 
 
-
+#####
 
 ################### NOTES ##################
 
