@@ -1,6 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: 'A CloudFormation template to form a VPC for our tutorial'
-#Parameters:
+Parameters:
+  OperatorEMail:
+    Description: "EMail address to notify if there are any scaling operations"
+    Type: String
+    AllowedPattern: "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)"
+    ConstraintDescription: "must be a valid email address."
+    Default:  ernievd@gmail.com
+
 #  OwnerName:
 #    Description: 'The name of the owning engineer for the item'
 #    Type: String
@@ -472,42 +479,14 @@ Resources:
       UnhealthyThresholdCount: 5
       VpcId: !Ref VPC
 
-
-#      VPCZoneIdentifier:
-#        - Ref: PublicSubnet1a
-#        - Ref: PublicSubnet1b
-#    UpdatePolicy:
-#      AutoScalingRollingUpdate:
-#        MinInstancesInService: 1
-
-##
-#  https://github:
-#    com/aws-samples/aws-code-snippets/blob/master/CloudFormation/ECS:
-#      md:
-  ### How do I associate this with my load balancer???
-  ## Look at get att - https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html
-  ## get all metadata
-
-
-#####
-
-################### NOTES ##################
-
-# Good EC2 instance example
-#  ServiceInstance:
-#    Type: "AWS::EC2::Instance"
-#    Properties:
-#      InstanceType: !Ref InstanceType
-#      IamInstanceProfile: !Ref InstanceProfile
-#      UserData:
-#        'Fn::Base64': !Sub |
-#          #cloud-config
-#          write_files:
-#          - path: /etc/sysconfig/cloudformation
-#            permissions: 0644
-#            owner: root
-#            content: |
-#              STACK_NAME=${AWS::StackName}
-#              AWS_REGION=${AWS::Region}
-#          runcmd:
-#          - aws s3 cp s3://${ArtifactsBucketName}/dd-get-secrets.py /home/ec2-user/dd-get-secrets.py
+ #  AWS::SNS::Topic
+  ScaleUpTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: ScaleUp_Alarm--CF
+      TopicName: ScaleUp_Alarm--CF
+      Subscription:
+       -
+        Endpoint:
+          Ref: OperatorEMail
+        Protocol: email
