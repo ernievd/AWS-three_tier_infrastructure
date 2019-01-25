@@ -1,0 +1,17 @@
+# Taken from https://stackoverflow.com/questions/27513145/aws-cloud-formation-template-providing-tags-for-the-stack-in-the-template
+# https://aws.amazon.com/blogs/devops/use-nested-stacks-to-create-reusable-templates-and-support-role-specialization/
+# aws cloudformation create-stack --stack-name QA-Trial-Stack-Wrapped --template-body file://WrappedStack.yml --region us-east-1 --capabilities CAPABILITY_IAM --parameters file://qa-parameters.json
+
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  wrappedStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/ernie-bucket/vpc.yml"
+#      Parameters:
+#        InstanceType: "t1.micro"
+#        KeyName: "mykey"
+      Tags:
+        - Key: Stage
+          Value: QA
+

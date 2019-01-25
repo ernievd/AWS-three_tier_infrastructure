@@ -1,7 +1,6 @@
 [
   {
-    "ParameterKey": "OwnerName",
-    "ParameterValue": "Ernie Van Duyne",
-    "ResolvedValue": "string"
+    "ParameterKey": "OperatorEMail",
+    "ParameterValue": "erniealarm@gmail.com"
   }
 ]

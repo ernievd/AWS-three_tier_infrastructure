@@ -6,7 +6,7 @@ Parameters:
     Type: String
     AllowedPattern: "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)"
     ConstraintDescription: "must be a valid email address."
-    Default:  ernievd@gmail.com
+    Default: erniealarm@gmail.com
 
 #  OwnerName:
 #    Description: 'The name of the owning engineer for the item'
@@ -458,6 +458,11 @@ Resources:
 #        - !GetAtt PublicSubnet1a.AvailabilityZone
 #        - !GetAtt PublicSubnet1b.AvailabilityZone
       DesiredCapacity: 2
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+      TerminationPolicies:
+      -
+        OldestInstance     # https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-termination.html
       #LoadBalancerNames:
       #- Ref: LoadBalancer
       MaxSize: 5
@@ -479,7 +484,7 @@ Resources:
       UnhealthyThresholdCount: 5
       VpcId: !Ref VPC
 
- #  AWS::SNS::Topic
+ #  ScaleUpTopic - AWS::SNS::Topic
   ScaleUpTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -490,3 +495,27 @@ Resources:
         Endpoint:
           Ref: OperatorEMail
         Protocol: email
+
+ #  ScaleDownTopic - AWS::SNS::Topic
+  ScaleDownTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: ScaleDown_Alarm--CF
+      TopicName: ScaleDown_Alarm--CF
+      Subscription:
+       -
+        Endpoint:
+          Ref: OperatorEMail
+        Protocol: email
+
+
+  #  ScaleUpTopic - AWS::SNS::Topic
+  ScaleUpTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: ScaleUp_Alarm--CF
+      TopicName: ScaleUp_Alarm--CF
+      Subscription:
+        - Endpoint:
+            Ref: OperatorEMail
+          Protocol: email
