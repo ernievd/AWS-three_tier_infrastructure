@@ -112,6 +112,8 @@ Resources:
         - Key: Environment
           Value: QA CloudFormation
 
+
+
   # Create an Internet Gateway
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -413,7 +415,6 @@ Resources:
       ToPort: 80
       SourceSecurityGroupId: !Ref InstanceSecurityGroup  #  InstanceSecurityGroup refers to the public application servers security group
 
-##############
 
 # Create a load balancer security group
   LoadBalancerSG: #This security group allows us to whitelist traffic from the internet to our load balancer
@@ -525,6 +526,26 @@ Resources:
       UnhealthyThresholdCount: 5
       VpcId: !Ref VPC
 
+# Create a database subnet group
+  DbSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: Subnet group created for the database in the CF group
+      DBSubnetGroupName: QA-privatedbsubnetgroup--CF
+      SubnetIds:
+        - !Ref PrivateSubnet1a
+        - !Ref PrivateSubnet1b
+
+
+
+
+
+
+
+
+
+
+  ### ALARM STUFF BELOW #############################################
  #  ScaleUpTopic - AWS::SNS::Topic
   ScaleUpTopic:
     Type: AWS::SNS::Topic
