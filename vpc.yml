@@ -374,6 +374,47 @@ Resources:
       ToPort: 80
       SourceSecurityGroupId: !Ref InstanceSecurityGroup
 
+  # Create a security group for the DatabaseB
+  PrivateSecGrpDBServerCF:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Configuration for database
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: QA-PrivateDB_SecGroup--CF
+
+
+  # AWS::EC2::SecurityGroupIngress SQL for Database
+  DbScIngress1:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    DependsOn:
+      - PrivateSecGrpDBServerCF
+    Properties:
+      Description: Secures SQL traffic to be allowed in the PrivateSecGrp-DBServer-CF to be from the application servers
+#  NOTE - Can not use GroupName - used GroupId and got the Id by using GetAtt
+      GroupId: !GetAtt PrivateSecGrpDBServerCF.GroupId
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !Ref InstanceSecurityGroup  #  InstanceSecurityGroup refers to the public application servers security group
+
+  # AWS::EC2::SecurityGroupIngress HTTP for Database
+  DbScIngress2:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    DependsOn:
+      - PrivateSecGrpDBServerCF
+    Properties:
+      Description: Secures HTTP traffic to be allowed in the PrivateSecGrp-DBServer-CF to be from the application servers
+#  NOTE - Can not use GroupName - used GroupId and got the Id by using GetAtt
+      GroupId: !GetAtt PrivateSecGrpDBServerCF.GroupId
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !Ref InstanceSecurityGroup  #  InstanceSecurityGroup refers to the public application servers security group
+
+##############
+
 # Create a load balancer security group
   LoadBalancerSG: #This security group allows us to whitelist traffic from the internet to our load balancer
     Type: "AWS::EC2::SecurityGroup"
