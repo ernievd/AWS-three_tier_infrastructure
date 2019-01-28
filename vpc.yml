@@ -508,14 +508,26 @@ Resources:
           Ref: OperatorEMail
         Protocol: email
 
-
-  #  ScaleUpTopic - AWS::SNS::Topic
-  ScaleUpTopic:
-    Type: AWS::SNS::Topic
+# Create Alarm - AWS::CloudWatch::Alarm
+  ScaleUpCpuAlarmNew:
+    Type: AWS::CloudWatch::Alarm
+#    DependsOn: AppASG
     Properties:
-      DisplayName: ScaleUp_Alarm--CF
-      TopicName: ScaleUp_Alarm--CF
-      Subscription:
-        - Endpoint:
-            Ref: OperatorEMail
-          Protocol: email
+      AlarmDescription: "Scale-up if CPU > 70% for 5 minutes"
+      AlarmName: ScaleUpCpuAlarm-New--CF
+#      Unit: Percent
+      MetricName: CPUUtilization
+      Namespace: "AWS/EC2"
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 70
+      Dimensions:
+        -
+          Name: AutoscalingGroupName
+          Value:
+            Ref: AppASG
+      ComparisonOperator: GreaterThanThreshold
+#      AlarmActions:
+#        -
+#          Ref: WebServerScaleUpPolicy
