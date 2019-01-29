@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "DatabaseUsername",
+    "ParameterValue": "dbuser"
+  },
+  {
+    "ParameterKey": "DatabasePassword",
+    "ParameterValue": "mypassword"
+  }
+]
